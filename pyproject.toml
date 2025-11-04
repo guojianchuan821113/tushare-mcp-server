@@ -1,0 +1,15 @@
+[project]
+name = "tushare-mcp-server"
+version = "0.1.0"
+description = "MCP server wrapping selected Tushare Pro APIs over stdio"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "mcp[cli]",
+  "tushare",
+  "python-dotenv",
+  "pandas",
+]
+
+[tool.uv]
+package = true
