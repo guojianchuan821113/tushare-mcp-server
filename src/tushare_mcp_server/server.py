@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Optional
+from typing import Optional, cast
 
 import tushare as ts
 from dotenv import load_dotenv
@@ -45,7 +45,7 @@ def stk_factor_pro(
             end_date=end_date,
             **({"fields": fields} if fields is not None else {})
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -70,7 +70,7 @@ def moneyflow(
             start_date=start_date,
             end_date=end_date,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -92,7 +92,7 @@ def moneyflow_cnt_ths(
             concept_code=concept_code,
             concept_name=concept_name,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -114,7 +114,7 @@ def moneyflow_ind_ths(
             industry_code=industry_code,
             industry_name=industry_name,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -139,7 +139,7 @@ def cyq_perf(
             start_date=start_date,
             end_date=end_date,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -168,7 +168,7 @@ def stock_basic(
             is_hs=is_hs,
             **({"fields": fields} if fields is not None else {})
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -185,7 +185,7 @@ def index_classify(
     """
     try:
         df = pro.index_classify(level=level, industry=industry, src=src)
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -212,7 +212,7 @@ def fina_indicator(
             period=period,
             **({"fields": fields} if fields is not None else {})
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -237,7 +237,7 @@ def stk_holdernumber(
             start_date=start_date,
             end_date=end_date,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -262,7 +262,7 @@ def ths_daily(
             start_date=start_date,
             end_date=end_date,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -280,7 +280,7 @@ def index_weekly(
     """
     try:
         df = pro.index_weekly(ts_code=ts_code, start_date=start_date, end_date=end_date)
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -305,7 +305,7 @@ def trade_cal(
             end_date=end_date,
             is_open=is_open,
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -330,7 +330,270 @@ def stk_auction_o(
             start_date=start_date,
             end_date=end_date,
         )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def income(
+    ts_code: Optional[str] = None,
+    ann_date: Optional[str] = None,
+    f_ann_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    period: Optional[str] = None,
+    report_type: Optional[str] = None,
+    comp_type: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取利润表数据。
+
+    - ts_code: 股票代码
+    - ann_date/f_ann_date: 公告日期/实际公告日期（YYYYMMDD）
+    - start_date/end_date: 公告日期范围（YYYYMMDD）
+    - period: 报告期（如 20171231、20170930 等）
+    - report_type/comp_type: 报告类型/公司类型
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.income(
+            ts_code=ts_code,
+            ann_date=ann_date,
+            f_ann_date=f_ann_date,
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+            report_type=report_type,
+            comp_type=comp_type,
+            **({"fields": fields} if fields is not None else {})
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def balancesheet(
+    ts_code: Optional[str] = None,
+    ann_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    period: Optional[str] = None,
+    report_type: Optional[str] = None,
+    comp_type: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取资产负债表数据。
+
+    - ts_code: 股票代码
+    - ann_date: 公告日期（YYYYMMDD）
+    - start_date/end_date: 公告日期范围（YYYYMMDD）
+    - period: 报告期（如 20171231、20170930 等）
+    - report_type/comp_type: 报告类型/公司类型
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.balancesheet(
+            ts_code=ts_code,
+            ann_date=ann_date,
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+            report_type=report_type,
+            comp_type=comp_type,
+            **({"fields": fields} if fields is not None else {})
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def cashflow(
+    ts_code: Optional[str] = None,
+    ann_date: Optional[str] = None,
+    f_ann_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    period: Optional[str] = None,
+    report_type: Optional[str] = None,
+    comp_type: Optional[str] = None,
+    is_calc: Optional[int] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取现金流量表数据。
+
+    - ts_code: 股票代码
+    - ann_date/f_ann_date: 公告日期/实际公告日期（YYYYMMDD）
+    - start_date/end_date: 公告日期范围（YYYYMMDD）
+    - period: 报告期（如 20171231、20170930 等）
+    - report_type/comp_type: 报告类型/公司类型
+    - is_calc: 是否计算报表
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.cashflow(
+            ts_code=ts_code,
+            ann_date=ann_date,
+            f_ann_date=f_ann_date,
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+            report_type=report_type,
+            comp_type=comp_type,
+            is_calc=is_calc,
+            **({"fields": fields} if fields is not None else {})
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def top10_floatholders(
+    ts_code: Optional[str] = None,
+    period: Optional[str] = None,
+    ann_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取前十大流通股东数据。
+
+    - ts_code: 股票代码
+    - period: 报告期（YYYYMMDD）
+    - ann_date: 公告日期（YYYYMMDD）
+    - start_date/end_date: 报告期范围（YYYYMMDD）
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.top10_floatholders(
+            ts_code=ts_code,
+            period=period,
+            ann_date=ann_date,
+            start_date=start_date,
+            end_date=end_date,
+            **({"fields": fields} if fields is not None else {})
+        )
         return df.to_json(orient="records", force_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def index_monthly(
+    ts_code: Optional[str] = None,
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取指数月线行情数据。
+
+    参数说明：
+    - ts_code: TS指数代码
+    - trade_date: 交易日期，格式 YYYYMMDD
+    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.index_monthly(
+            ts_code=ts_code,
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
+            **({"fields": fields} if fields is not None else {})
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def idx_factor_pro(
+    ts_code: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    trade_date: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取指数技术因子数据（专业版）。
+
+    参数说明：
+    - ts_code: 指数代码(大盘指数 申万指数 中信指数)
+    - start_date/end_date: 开始/结束日期
+    - trade_date: 交易日期
+    - fields: 指定返回字段
+    """
+    try:
+        df = pro.idx_factor_pro(
+            ts_code=ts_code,
+            start_date=start_date,
+            end_date=end_date,
+            trade_date=trade_date,
+            **({"fields": fields} if fields is not None else {})
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def moneyflow_mkt_dc(
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> str:
+    """获取东方财富大盘资金流向数据。
+
+    参数说明：
+    - trade_date: 交易日期(YYYYMMDD格式)
+    - start_date: 开始日期
+    - end_date: 结束日期
+    
+    数据说明：
+    - 每日盘后更新
+    - 包含上证/深证收盘价、涨跌幅
+    - 提供主力净流入、超大单、大单、中单、小单资金流向数据
+    """
+    try:
+        df = pro.moneyflow_mkt_dc(
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def moneyflow_hsgt(
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> str:
+    """获取沪深港通资金流向数据。
+
+    参数说明：
+    - trade_date: 交易日期(YYYYMMDD格式)
+    - start_date: 开始日期
+    - end_date: 结束日期
+    
+    数据说明：
+    - 包含沪股通、深股通、港股通资金流向
+    - 提供北向资金和南向资金数据
+    - 每日18~20点之间完成更新
+    - 每次最多返回300条记录
+    """
+    try:
+        df = pro.moneyflow_hsgt(
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
