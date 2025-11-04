@@ -476,7 +476,7 @@ def top10_floatholders(
             end_date=end_date,
             **({"fields": fields} if fields is not None else {})
         )
-        return df.to_json(orient="records", force_ascii=False)
+        return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
 
@@ -492,11 +492,27 @@ def index_monthly(
     """获取指数月线行情数据。
 
     参数说明：
-    - ts_code: TS指数代码
-    - trade_date: 交易日期，格式 YYYYMMDD
-    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD
+    - ts_code: TS指数代码 (必需参数之一)
+    - trade_date: 交易日期，格式 YYYYMMDD (必需参数之一)
+    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD (start_date为必需参数之一)
     - fields: 指定返回字段
+    
+    注意：必须提供以下参数之一: ts_code, trade_date
+    日期格式必须为YYYYMMDD，例如: 20240101
+    
+    示例调用：
+    index_monthly(ts_code="000001.SH", start_date="20240101", end_date="20240131")
     """
+    # 参数验证
+    if ts_code is None and trade_date is None:
+        return json.dumps({"error": "必须提供以下参数之一: ts_code, trade_date"})
+    
+    # 日期格式验证
+    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
+    for field_name, date_value in date_fields.items():
+        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
+            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
+    
     try:
         df = pro.index_monthly(
             ts_code=ts_code,
@@ -521,11 +537,27 @@ def idx_factor_pro(
     """获取指数技术因子数据（专业版）。
 
     参数说明：
-    - ts_code: 指数代码(大盘指数 申万指数 中信指数)
-    - start_date/end_date: 开始/结束日期
-    - trade_date: 交易日期
+    - ts_code: 指数代码(大盘指数 申万指数 中信指数) (必需参数之一)
+    - start_date/end_date: 开始/结束日期 (start_date为必需参数之一)
+    - trade_date: 交易日期 (必需参数之一)
     - fields: 指定返回字段
+    
+    注意：必须提供以下参数之一: ts_code, trade_date
+    日期格式必须为YYYYMMDD，例如: 20240101
+    
+    示例调用：
+    idx_factor_pro(ts_code="000001.SH", start_date="20240101", end_date="20240131")
     """
+    # 参数验证
+    if ts_code is None and trade_date is None:
+        return json.dumps({"error": "必须提供以下参数之一: ts_code, trade_date"})
+    
+    # 日期格式验证
+    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
+    for field_name, date_value in date_fields.items():
+        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
+            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
+    
     try:
         df = pro.idx_factor_pro(
             ts_code=ts_code,
@@ -548,15 +580,28 @@ def moneyflow_mkt_dc(
     """获取东方财富大盘资金流向数据。
 
     参数说明：
-    - trade_date: 交易日期(YYYYMMDD格式)
-    - start_date: 开始日期
-    - end_date: 结束日期
+    - trade_date: 交易日期(YYYYMMDD格式) (可选参数)
+    - start_date: 开始日期(YYYYMMDD格式) (可选参数)
+    - end_date: 结束日期(YYYYMMDD格式) (可选参数)
+    
+    注意：所有参数都是可选的，如果不提供任何参数，将返回默认数据
+    日期格式必须为YYYYMMDD，例如: 20240101
+    
+    示例调用：
+    moneyflow_mkt_dc(start_date="20240101", end_date="20240131")
+    moneyflow_mkt_dc()  # 返回默认数据
     
     数据说明：
     - 每日盘后更新
     - 包含上证/深证收盘价、涨跌幅
     - 提供主力净流入、超大单、大单、中单、小单资金流向数据
     """
+    # 日期格式验证
+    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
+    for field_name, date_value in date_fields.items():
+        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
+            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
+    
     try:
         df = pro.moneyflow_mkt_dc(
             trade_date=trade_date,
@@ -577,9 +622,15 @@ def moneyflow_hsgt(
     """获取沪深港通资金流向数据。
 
     参数说明：
-    - trade_date: 交易日期(YYYYMMDD格式)
-    - start_date: 开始日期
-    - end_date: 结束日期
+    - trade_date: 交易日期(YYYYMMDD格式) (必需参数之一)
+    - start_date: 开始日期(YYYYMMDD格式) (必需参数之一)
+    - end_date: 结束日期(YYYYMMDD格式)
+    
+    注意：必须提供以下参数之一: trade_date, start_date
+    日期格式必须为YYYYMMDD，例如: 20240101
+    
+    示例调用：
+    moneyflow_hsgt(start_date="20240101", end_date="20240131")
     
     数据说明：
     - 包含沪股通、深股通、港股通资金流向
@@ -587,6 +638,16 @@ def moneyflow_hsgt(
     - 每日18~20点之间完成更新
     - 每次最多返回300条记录
     """
+    # 参数验证
+    if trade_date is None and start_date is None:
+        return json.dumps({"error": "必须提供以下参数之一: trade_date, start_date"})
+    
+    # 日期格式验证
+    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
+    for field_name, date_value in date_fields.items():
+        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
+            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
+    
     try:
         df = pro.moneyflow_hsgt(
             trade_date=trade_date,
