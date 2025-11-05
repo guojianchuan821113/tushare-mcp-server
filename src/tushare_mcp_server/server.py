@@ -27,7 +27,6 @@ def stk_factor_pro(
     trade_date: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取股票技术面因子数据（专业版技术指标）。
 
@@ -35,7 +34,6 @@ def stk_factor_pro(
     - ts_code: 股票代码，如 000001.SZ
     - trade_date: 交易日期，格式 YYYYMMDD
     - start_date/end_date: 开始/结束日期，格式 YYYYMMDD
-    - fields: 指定返回字段
     """
     try:
         df = pro.stk_factor_pro(
@@ -43,7 +41,6 @@ def stk_factor_pro(
             trade_date=trade_date,
             start_date=start_date,
             end_date=end_date,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -77,20 +74,23 @@ def moneyflow(
 
 @mcp.tool()
 def moneyflow_cnt_ths(
-    date: Optional[str] = None,
-    concept_code: Optional[str] = None,
-    concept_name: Optional[str] = None,
+    ts_code: Optional[str] = None,
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
 ) -> str:
     """获取同花顺概念板块资金流向数据。
 
-    - date: 日期 YYYYMMDD
-    - concept_code/name: 概念代码或名称
+    - ts_code: 板块代码
+    - trade_date: 交易日期 YYYYMMDD
+    - start_date/end_date: 日期范围
     """
     try:
         df = pro.moneyflow_cnt_ths(
-            date=date,
-            concept_code=concept_code,
-            concept_name=concept_name,
+            ts_code=ts_code,
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -99,18 +99,26 @@ def moneyflow_cnt_ths(
 
 @mcp.tool()
 def moneyflow_ind_ths(
-    date: Optional[str] = None,
+    ts_code: Optional[str] = None,
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
     industry_code: Optional[str] = None,
     industry_name: Optional[str] = None,
 ) -> str:
     """获取同花顺行业板块资金流向数据。
 
-    - date: 日期 YYYYMMDD
+    - ts_code: 板块代码
+    - trade_date: 交易日期 YYYYMMDD
+    - start_date/end_date: 日期范围
     - industry_code/name: 行业代码或名称
     """
     try:
         df = pro.moneyflow_ind_ths(
-            date=date,
+            ts_code=ts_code,
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
             industry_code=industry_code,
             industry_name=industry_name,
         )
@@ -176,15 +184,14 @@ def stock_basic(
 @mcp.tool()
 def index_classify(
     level: Optional[str] = None,
-    industry: Optional[str] = None,
     src: Optional[str] = None,
 ) -> str:
     """获取行业分类信息。
 
-    可选参数：level、industry、src
+    可选参数：level、src
     """
     try:
-        df = pro.index_classify(level=level, industry=industry, src=src)
+        df = pro.index_classify(level=level, src=src)
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
@@ -197,11 +204,10 @@ def fina_indicator(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     period: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取财务指标数据。
 
-    常用参数：ts_code、ann_date、start_date、end_date、period、fields
+    常用参数：ts_code、ann_date、start_date、end_date、period
     """
     try:
         df = pro.fina_indicator(
@@ -210,7 +216,6 @@ def fina_indicator(
             start_date=start_date,
             end_date=end_date,
             period=period,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -221,6 +226,7 @@ def fina_indicator(
 def stk_holdernumber(
     ts_code: Optional[str] = None,
     ann_date: Optional[str] = None,
+    enddate: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> str:
@@ -228,12 +234,14 @@ def stk_holdernumber(
 
     - ts_code: 股票代码
     - ann_date: 公告日期
+    - enddate: 截止日期
     - start_date/end_date: 公告日期范围
     """
     try:
         df = pro.stk_holdernumber(
             ts_code=ts_code,
             ann_date=ann_date,
+            enddate=enddate,
             start_date=start_date,
             end_date=end_date,
         )
@@ -270,16 +278,18 @@ def ths_daily(
 @mcp.tool()
 def index_weekly(
     ts_code: Optional[str] = None,
+    trade_date: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
 ) -> str:
     """获取指数周线数据。
 
     - ts_code: 指数代码
+    - trade_date: 交易日期
     - start_date/end_date: 日期范围
     """
     try:
-        df = pro.index_weekly(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        df = pro.index_weekly(ts_code=ts_code, trade_date=trade_date, start_date=start_date, end_date=end_date)
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
         return json.dumps({"error": str(e)})
@@ -290,7 +300,7 @@ def trade_cal(
     exchange: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    is_open: Optional[int] = None,
+    is_open: Optional[str] = None,
 ) -> str:
     """获取交易日历数据。
 
@@ -345,7 +355,6 @@ def income(
     period: Optional[str] = None,
     report_type: Optional[str] = None,
     comp_type: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取利润表数据。
 
@@ -354,7 +363,6 @@ def income(
     - start_date/end_date: 公告日期范围（YYYYMMDD）
     - period: 报告期（如 20171231、20170930 等）
     - report_type/comp_type: 报告类型/公司类型
-    - fields: 指定返回字段
     """
     try:
         df = pro.income(
@@ -366,7 +374,6 @@ def income(
             period=period,
             report_type=report_type,
             comp_type=comp_type,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -375,14 +382,13 @@ def income(
 
 @mcp.tool()
 def balancesheet(
-    ts_code: Optional[str] = None,
+    ts_code: str,
     ann_date: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     period: Optional[str] = None,
     report_type: Optional[str] = None,
     comp_type: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取资产负债表数据。
 
@@ -391,7 +397,6 @@ def balancesheet(
     - start_date/end_date: 公告日期范围（YYYYMMDD）
     - period: 报告期（如 20171231、20170930 等）
     - report_type/comp_type: 报告类型/公司类型
-    - fields: 指定返回字段
     """
     try:
         df = pro.balancesheet(
@@ -402,7 +407,6 @@ def balancesheet(
             period=period,
             report_type=report_type,
             comp_type=comp_type,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -411,7 +415,7 @@ def balancesheet(
 
 @mcp.tool()
 def cashflow(
-    ts_code: Optional[str] = None,
+    ts_code: str,
     ann_date: Optional[str] = None,
     f_ann_date: Optional[str] = None,
     start_date: Optional[str] = None,
@@ -420,7 +424,6 @@ def cashflow(
     report_type: Optional[str] = None,
     comp_type: Optional[str] = None,
     is_calc: Optional[int] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取现金流量表数据。
 
@@ -430,7 +433,6 @@ def cashflow(
     - period: 报告期（如 20171231、20170930 等）
     - report_type/comp_type: 报告类型/公司类型
     - is_calc: 是否计算报表
-    - fields: 指定返回字段
     """
     try:
         df = pro.cashflow(
@@ -443,7 +445,6 @@ def cashflow(
             report_type=report_type,
             comp_type=comp_type,
             is_calc=is_calc,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -452,12 +453,11 @@ def cashflow(
 
 @mcp.tool()
 def top10_floatholders(
-    ts_code: Optional[str] = None,
-    period: Optional[str] = None,
+    ts_code: str,
+    period: str,
     ann_date: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取前十大流通股东数据。
 
@@ -465,7 +465,6 @@ def top10_floatholders(
     - period: 报告期（YYYYMMDD）
     - ann_date: 公告日期（YYYYMMDD）
     - start_date/end_date: 报告期范围（YYYYMMDD）
-    - fields: 指定返回字段
     """
     try:
         df = pro.top10_floatholders(
@@ -474,7 +473,6 @@ def top10_floatholders(
             ann_date=ann_date,
             start_date=start_date,
             end_date=end_date,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -487,39 +485,20 @@ def index_monthly(
     trade_date: Optional[str] = None,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取指数月线行情数据。
 
     参数说明：
-    - ts_code: TS指数代码 (必需参数之一)
-    - trade_date: 交易日期，格式 YYYYMMDD (必需参数之一)
-    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD (start_date为必需参数之一)
-    - fields: 指定返回字段
-    
-    注意：必须提供以下参数之一: ts_code, trade_date
-    日期格式必须为YYYYMMDD，例如: 20240101
-    
-    示例调用：
-    index_monthly(ts_code="000001.SH", start_date="20240101", end_date="20240131")
+    - ts_code: TS指数代码
+    - trade_date: 交易日期，格式 YYYYMMDD
+    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD
     """
-    # 参数验证
-    if ts_code is None and trade_date is None:
-        return json.dumps({"error": "必须提供以下参数之一: ts_code, trade_date"})
-    
-    # 日期格式验证
-    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
-    for field_name, date_value in date_fields.items():
-        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
-            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
-    
     try:
         df = pro.index_monthly(
             ts_code=ts_code,
             trade_date=trade_date,
             start_date=start_date,
             end_date=end_date,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -532,39 +511,20 @@ def idx_factor_pro(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     trade_date: Optional[str] = None,
-    fields: Optional[str] = None,
 ) -> str:
     """获取指数技术因子数据（专业版）。
 
     参数说明：
-    - ts_code: 指数代码(大盘指数 申万指数 中信指数) (必需参数之一)
-    - start_date/end_date: 开始/结束日期 (start_date为必需参数之一)
-    - trade_date: 交易日期 (必需参数之一)
-    - fields: 指定返回字段
-    
-    注意：必须提供以下参数之一: ts_code, trade_date
-    日期格式必须为YYYYMMDD，例如: 20240101
-    
-    示例调用：
-    idx_factor_pro(ts_code="000001.SH", start_date="20240101", end_date="20240131")
+    - ts_code: 指数代码(大盘指数 申万指数 中信指数)
+    - start_date/end_date: 开始/结束日期
+    - trade_date: 交易日期
     """
-    # 参数验证
-    if ts_code is None and trade_date is None:
-        return json.dumps({"error": "必须提供以下参数之一: ts_code, trade_date"})
-    
-    # 日期格式验证
-    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
-    for field_name, date_value in date_fields.items():
-        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
-            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
-    
     try:
         df = pro.idx_factor_pro(
             ts_code=ts_code,
             start_date=start_date,
             end_date=end_date,
             trade_date=trade_date,
-            **({"fields": fields} if fields is not None else {})
         )
         return cast(str, df.to_json(orient="records", force_ascii=False))
     except Exception as e:
@@ -596,12 +556,6 @@ def moneyflow_mkt_dc(
     - 包含上证/深证收盘价、涨跌幅
     - 提供主力净流入、超大单、大单、中单、小单资金流向数据
     """
-    # 日期格式验证
-    date_fields = {"trade_date": trade_date, "start_date": start_date, "end_date": end_date}
-    for field_name, date_value in date_fields.items():
-        if date_value is not None and not (len(date_value) == 8 and date_value.isdigit()):
-            return json.dumps({"error": f"参数 {field_name} 的日期格式不正确，必须为YYYYMMDD格式，例如: 20240101"})
-    
     try:
         df = pro.moneyflow_mkt_dc(
             trade_date=trade_date,
