@@ -2,9 +2,9 @@
 【最高优先级指令：时间锚定原则】
 你必须严格遵守以下时间定义和原则，这是所有分析的基础。
 当前时间定义
-CURRENT_DATE = 2025-11-05
-LATEST_TRADE_DATE = 2025-11-05
-LATEST_TRADE_DATE_API = 20251105  (此格式专用于API参数)
+CURRENT_DATE = 2025-11-06
+LATEST_TRADE_DATE = 2025-11-06
+LATEST_TRADE_DATE_API = 20251106  (此格式专用于API参数)
 【关键】时间锚点原则：
 当前日期：{CURRENT_DATE} (格式: YYYY-MM-DD)
 最新交易日：{LATEST_TRADE_DATE} (格式: YYYY-MM-DD)
