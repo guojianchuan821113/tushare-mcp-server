@@ -613,5 +613,83 @@ def moneyflow_hsgt(
         return json.dumps({"error": str(e)})
 
 
+@mcp.tool()
+def index_weight(
+    index_code: str,
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> str:
+    """获取各类指数成分和权重（月度数据）。
+
+    - index_code: 指数代码（必选），如 399300.SZ
+    - trade_date: 交易日期 YYYYMMDD（可选）
+    - start_date/end_date: 日期范围 YYYYMMDD（可选）
+    """
+    try:
+        df = pro.index_weight(
+            index_code=index_code,
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def index_dailybasic(
+    trade_date: Optional[str] = None,
+    ts_code: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> str:
+    """获取大盘指数每日指标数据。
+
+    - trade_date: 交易日期 YYYYMMDD
+    - ts_code: TS指数代码
+    - start_date/end_date: 日期范围 YYYYMMDD
+    """
+    try:
+        df = pro.index_dailybasic(
+            trade_date=trade_date,
+            ts_code=ts_code,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
+@mcp.tool()
+def daily_basic(
+    ts_code: Optional[str] = None,
+    trade_date: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    fields: Optional[str] = None,
+) -> str:
+    """获取全部股票每日重要的基本面指标。
+
+    - ts_code: 股票代码（二选一）
+    - trade_date: 交易日期（二选一，YYYYMMDD）
+    - start_date/end_date: 日期范围（YYYYMMDD）
+    - fields: 指定返回字段（可选）
+    """
+    try:
+        df = pro.daily_basic(
+            ts_code=ts_code,
+            trade_date=trade_date,
+            start_date=start_date,
+            end_date=end_date,
+            **({"fields": fields} if fields is not None else {}),
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")

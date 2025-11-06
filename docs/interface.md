@@ -427,6 +427,7 @@ data = pro.query('stock_basic', exchange='', list_status='L', fields='ts_code,sy
 ---
 
 ### 7. 行业分类信息 - index_classify
+ 
 
 **Tushare 接口**: `pro.index_classify()`
 **MCP 工具名**: `index_classify`
@@ -1343,6 +1344,129 @@ pro.moneyflow_hsgt(trade_date="20240930")
 **限制说明**:
 - 每次最多返回300条记录，总量不限制
 - 2000积分起，5000积分每分钟可提取500次
+
+---
+
+### 22. 指数成分和权重 - index_weight
+
+**Tushare 接口**: `pro.index_weight()`
+**MCP 工具名**: `index_weight`
+**描述**: 获取各类指数成分和权重，月度数据。建议按月查询时，开始日期用当月第一天、结束日期用当月最后一天。[0]
+
+**参数说明**:
+- `index_code` (str): 指数代码（必选），如 `399300.SZ`
+- `trade_date` (str): 交易日期（YYYYMMDD），非必选
+- `start_date` (str): 开始日期（YYYYMMDD），非必选
+- `end_date` (str): 结束日期（YYYYMMDD），非必选
+
+**使用示例**:
+```python
+# 提取沪深300指数2018年9月成分和权重
+pro.index_weight(index_code='399300.SZ', start_date='20180901', end_date='20180930')
+```
+
+**返回字段**:
+- `index_code`: 指数代码
+- `con_code`: 成分代码
+- `trade_date`: 交易日期
+- `weight`: 权重
+
+**限制说明**:
+- 月度数据，建议按月查询 [0]
+- 需要至少2000积分 [0]
+
+---
+
+### 23. 大盘指数每日指标 - index_dailybasic
+
+**Tushare 接口**: `pro.index_dailybasic()`
+**MCP 工具名**: `index_dailybasic`
+**描述**: 获取大盘指数每日指标，目前仅提供上证综指、深证成指、上证50、中证500、中小板指、创业板指的每日指标数据。
+
+**参数说明**:
+- `trade_date` (str): 交易日期（格式：YYYYMMDD）
+- `ts_code` (str): TS代码
+- `start_date` (str): 开始日期（YYYYMMDD）
+- `end_date` (str): 结束日期（YYYYMMDD）
+
+说明：`trade_date`、`ts_code` 至少输入一个参数，单次限量3000条。
+
+**使用示例**:
+```python
+# 获取2018-10-18某些指标
+pro.index_dailybasic(trade_date='20181018', fields='ts_code,trade_date,turnover_rate,pe')
+```
+
+**返回字段**:
+- `ts_code`: TS代码
+- `trade_date`: 交易日期
+- `total_mv`: 当日总市值（元）
+- `float_mv`: 当日流通市值（元）
+- `total_share`: 当日总股本（股）
+- `float_share`: 当日流通股本（股）
+- `free_share`: 当日自由流通股本（股）
+- `turnover_rate`: 换手率
+- `turnover_rate_f`: 换手率(基于自由流通股本)
+- `pe`: 市盈率
+- `pe_ttm`: 市盈率TTM
+- `pb`: 市净率
+
+**限制说明**:
+- 用户需要至少400积分才可以调取
+- 单次限量3000条
+
+
+
+### 24. 每日指标数据 - daily_basic
+
+**Tushare 接口**: `pro.daily_basic()`
+**MCP 工具名**: `daily_basic`
+**描述**: 获取全部股票每日重要的基本面指标，可用于选股分析、报表展示等。每日15点～17点更新；当财务数据缺失时，可用其中的 `pe_ttm`、`pb` 等作为替代指标。
+
+**参数说明**:
+- `ts_code` (str): 股票代码（二选一，格式如 `600000.SH`），可选
+- `trade_date` (str): 交易日期（二选一，`YYYYMMDD`），可选
+- `start_date` (str): 开始日期（`YYYYMMDD`），可选
+- `end_date` (str): 结束日期（`YYYYMMDD`），可选
+- `fields` (str): 指定返回字段，逗号分隔，可选
+
+**使用示例**:
+```python
+# 获取所有股票某一天的每日指标（只取部分字段）
+pro.daily_basic(trade_date='20180726', fields='ts_code,trade_date,turnover_rate,volume_ratio,pe,pb')
+
+# 获取单只股票一段时间的每日指标（全部字段）
+pro.daily_basic(ts_code='600000.SH', start_date='20240101', end_date='20240131')
+```
+
+**返回字段（常用）**:
+- `ts_code`: TS股票代码
+- `trade_date`: 交易日期
+- `close`: 当日收盘价
+- `turnover_rate`: 换手率（%）
+- `turnover_rate_f`: 换手率（自由流通股）
+- `volume_ratio`: 量比
+- `pe`: 市盈率（总市值/净利润，亏损时为空）
+- `pe_ttm`: 市盈率（TTM，亏损时为空）
+- `pb`: 市净率（总市值/净资产）
+- `ps`: 市销率
+- `ps_ttm`: 市销率（TTM）
+- `dv_ratio`: 股息率（%）
+- `dv_ttm`: 股息率（TTM）（%）
+- `total_share`: 总股本（万股）
+- `float_share`: 流通股本（万股）
+- `free_share`: 自由流通股本（万）
+- `total_mv`: 总市值（万元）
+- `circ_mv`: 流通市值（万元）
+
+**限制说明**:
+- 单次最大返回6000条数据；可按日线循环提取全部历史
+- 积分：至少2000积分才可以调取，5000积分无总量限制
+
+**MCP 使用说明**:
+- 工具名：`daily_basic`
+- 支持参数：`ts_code`、`trade_date`、`start_date`、`end_date`、`fields`
+- 至少提供 `ts_code` 或 `trade_date` 其中之一；日期格式为 `YYYYMMDD`
 
 ---
 
