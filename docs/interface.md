@@ -1,6 +1,6 @@
 # Tushare Pro 接口详细使用说明
 
-本文档详细介绍了Tushare Pro提供的21个主要接口的使用方法、参数说明和限制条件，便于大模型理解和使用这些接口。
+本文档详细介绍了Tushare Pro提供的22个主要接口的使用方法、参数说明和限制条件，便于大模型理解和使用这些接口。
 
 ## 接口详细说明
 
@@ -468,7 +468,48 @@ pro.index_classify(level="L2", src="SW")
 
 ---
 
-### 8. 财务指标数据 - fina_indicator
+### 8. 申万行业成分构成 - index_member_all
+
+**Tushare 接口**: `pro.index_member_all()`
+**MCP 工具名**: `index_member_all`
+**描述**: 按三级分类提取申万行业成分，可提供某个分类的所有成分，也可按股票代码提取所属分类，参数灵活限量：单次最大2000行，总量不限制权限：用户需2000积分可调取，积分获取方法请参阅积分获取办法。
+
+**参数说明**:
+- `l1_code` (str): 一级行业代码，非必选
+- `l2_code` (str): 二级行业代码，非必选
+- `l3_code` (str): 三级行业代码，非必选
+- `ts_code` (str): 股票代码，非必选
+- `is_new` (str): 是否最新（默认为"Y是"），非必选
+
+**使用示例**:
+```python
+# 获取黄金分类的成份股
+pro.index_member_all(l3_code='850531.SI')
+
+# 获取000001.SZ所属行业
+pro.index_member_all(ts_code='000001.SZ')
+```
+
+**返回字段**:
+- `l1_code`: 一级行业代码
+- `l1_name`: 一级行业名称
+- `l2_code`: 二级行业代码
+- `l2_name`: 二级行业名称
+- `l3_code`: 三级行业代码
+- `l3_name`: 三级行业名称
+- `ts_code`: 成分股票代码
+- `name`: 成分股票名称
+- `in_date`: 纳入日期
+- `out_date`: 剔除日期
+- `is_new`: 是否最新Y是N否
+
+**限制说明**:
+- 单次最大2000行，总量不限制
+- 用户需2000积分可调取，积分获取方法请参阅积分获取办法
+
+---
+
+### 9. 财务指标数据 - fina_indicator
 
 **Tushare 接口**: `pro.fina_indicator()`
 **MCP 工具名**: `fina_indicator`
@@ -589,7 +630,7 @@ pro.fina_indicator(ts_code="600000.SH", start_date="20230101", end_date="2023123
 
 ---
 
-### 9. 股东人数数据 - stk_holdernumber
+### 10. 股东人数数据 - stk_holdernumber
 
 **Tushare 接口**: `pro.stk_holdernumber()`
 **MCP 工具名**: `stk_holdernumber`
@@ -623,7 +664,7 @@ pro.stk_holdernumber(ann_date="20240101")
 
 ---
 
-### 10. 同花顺板块指数行情 - ths_daily
+### 11. 同花顺板块指数行情 - ths_daily
 
 **Tushare 接口**: `pro.ths_daily()`
 **MCP 工具名**: `ths_daily`
@@ -665,7 +706,7 @@ pro.ths_daily(trade_date="20240101")
 
 ---
 
-### 11. 指数周线行情 - index_weekly
+### 12. 指数周线行情 - index_weekly
 
 **Tushare 接口**: `pro.index_weekly()`
 **MCP 工具名**: `index_weekly`
@@ -705,7 +746,7 @@ pro.index_weekly(trade_date='20190329', fields='ts_code,trade_date,open,high,low
 
 ---
 
-### 12. 交易日历 - trade_cal
+### 13. 交易日历 - trade_cal
 
 **Tushare 接口**: `pro.trade_cal()`
 **MCP 工具名**: `trade_cal`
@@ -737,7 +778,7 @@ pro.query('trade_cal', start_date='20180101', end_date='20181231')
 
 ---
 
-### 13. 股票开盘集合竞价数据 - stk_auction_o
+### 14. 股票开盘集合竞价数据 - stk_auction_o
 
 **Tushare 接口**: `pro.stk_auction_o()`
 **MCP 工具名**: `stk_auction_o`
@@ -775,7 +816,7 @@ pro.stk_auction_o(ts_code="600000.SH", start_date="20240101", end_date="20240131
 
 ---
 
-### 14. 利润表 - income
+### 15. 利润表 - income
 
 **Tushare 接口**: `pro.income()`
 **MCP 工具名**: `income`
@@ -858,7 +899,7 @@ pro.income(period='20231231', report_type=1)
 
 ---
 
-### 15. 资产负债表 - balancesheet
+### 16. 资产负债表 - balancesheet
 
 **Tushare 接口**: `pro.balancesheet()`
 **MCP 工具名**: `balancesheet`
@@ -989,7 +1030,7 @@ pro.balancesheet(ts_code="600000.SH", start_date="20230101", end_date="20231231"
 
 ---
 
-### 16. 现金流量表 - cashflow
+### 17. 现金流量表 - cashflow
 
 **Tushare 接口**: `pro.cashflow()`
 **MCP 工具名**: `cashflow`
@@ -1163,7 +1204,7 @@ pro.index_monthly(start_date="20240101", end_date="20240131")
 
 ---
 
-### 19. 指数技术因子 - idx_factor_pro
+### 20. 指数技术因子 - idx_factor_pro
 
 **Tushare 接口**: `pro.idx_factor_pro()`
 **MCP 工具名**: `idx_factor_pro`
@@ -1347,7 +1388,7 @@ pro.moneyflow_hsgt(trade_date="20240930")
 
 ---
 
-### 22. 指数成分和权重 - index_weight
+### 23. 指数成分和权重 - index_weight
 
 **Tushare 接口**: `pro.index_weight()`
 **MCP 工具名**: `index_weight`

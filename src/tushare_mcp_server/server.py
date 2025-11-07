@@ -691,5 +691,47 @@ def daily_basic(
         return json.dumps({"error": str(e)})
 
 
+@mcp.tool()
+def index_member_all(
+    l1_code: Optional[str] = None,
+    l2_code: Optional[str] = None,
+    l3_code: Optional[str] = None,
+    ts_code: Optional[str] = None,
+    is_new: Optional[str] = None,
+) -> str:
+    """获取申万行业成分构成(分级)。
+
+    参数说明：
+    - l1_code: 一级行业代码（可选）
+    - l2_code: 二级行业代码（可选）
+    - l3_code: 三级行业代码（可选）
+    - ts_code: 股票代码（可选）
+    - is_new: 是否最新（可选，默认为"Y"）
+    
+    使用说明：
+    - 可按三级分类提取申万行业成分，可提供某个分类的所有成分
+    - 也可按股票代码提取所属分类，参数灵活
+    - 单次最大2000行，总量不限制
+    
+    示例调用：
+    # 获取黄金分类的成份股
+    index_member_all(l3_code='850531.SI')
+    
+    # 获取000001.SZ所属行业
+    index_member_all(ts_code='000001.SZ')
+    """
+    try:
+        df = pro.index_member_all(
+            l1_code=l1_code,
+            l2_code=l2_code,
+            l3_code=l3_code,
+            ts_code=ts_code,
+            is_new=is_new,
+        )
+        return cast(str, df.to_json(orient="records", force_ascii=False))
+    except Exception as e:
+        return json.dumps({"error": str(e)})
+
+
 if __name__ == "__main__":
     mcp.run(transport="stdio")
