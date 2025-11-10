@@ -40,6 +40,43 @@ uv run src/tushare_mcp_server/server.py
 12. `trade_cal` — 交易日历
 13. `stk_auction_o` — 集合竞价
 
+## 行业分析工具
+在 `src/tool_kits/` 目录下提供了额外的行业分析工具：
+
+### 申万一级行业指数估值评估 (`sector_index.py`)
+基于PE/PB历史分位数评估行业估值状态（高估/低估/中性）。
+
+### 新增：行业盈利增长分析 (`sector_index.py` - profit_growth 模式)
+**最新功能**：计算申万一级行业指数的**最新季度加权净利润同比增速**，作为行业景气度核心指标。
+
+**主要特性**：
+- 使用官方月度成分股权重和个股扣非净利润同比增长率
+- 优先使用 `dt_netprofit_yoy`（扣非净利润增速），缺失时使用 `netprofit_yoy` 替代
+- 自动过滤异常值（|增速| > 1000%）和无效数据
+- 提供数据质量标记和详细的处理日志
+
+**使用方法**：
+```bash
+# 运行估值分析（默认）
+python src/tool_kits/sector_index.py
+
+# 运行盈利增长分析
+python src/tool_kits/sector_index.py profit_growth
+```
+
+**函数接口**：
+```python
+from src.tool_kits.sector_index import get_industry_profit_growth, evaluate_all_industries_profit_growth
+
+# 单个行业分析
+result = get_industry_profit_growth('801760.SI', '20251110')
+
+# 批量分析所有行业
+results_df = evaluate_all_industries_profit_growth()
+```
+
+详见 [`src/tool_kits/PROFIT_GROWTH_README.md`](src/tool_kits/PROFIT_GROWTH_README.md)
+
 所有工具均返回 JSON 字符串；若发生错误（参数/网络等），返回形如：
 ```json
 {"error": "<错误信息>"}
