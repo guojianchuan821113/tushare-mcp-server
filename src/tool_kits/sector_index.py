@@ -319,7 +319,7 @@ def get_industry_profit_growth(industry_code: str, trade_date: str = '20251110')
         elif trade_dt.month <= 9:
             period = f"{trade_dt.year}0331"   # 当年一季度
         else:
-            period = f"{trade_dt.year}0630"   # 当年二季度
+            period = f"{trade_dt.year}0630"   # 当年二季度（修正：10-12月使用Q2中报，而不是Q3）
         
         print(f"使用报告期: {period}")
         
