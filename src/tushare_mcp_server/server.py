@@ -735,243 +735,41 @@ def index_member_all(
 
 
 @mcp.tool()
-def get_trend_signals(
-    ts_code: str,
-    trade_date: Optional[str] = None,
-    start_date: Optional[str] = None,
-    end_date: Optional[str] = None,
-) -> str:
-    """获取股票趋势信号综合分析。
-    
-    基于 stk_factor_pro 数据，提供多维度的趋势信号分析：
-    - 价格与均线关系 (price_vs_ma5)
-    - 均线排列状态 (ma5_vs_ma20) 
-    - MACD信号 (macd_status)
-    - 综合趋势方向 (trend_direction)
-    - 趋势强度 (trend_strength)
-    - 动量变化 (momentum_change)
+def get_sentiment_volume(ts_code: str, trade_date: str) -> str:
+    """获取股票的量能情绪分析，评估市场参与度、资金流向与情绪倾向。
     
     参数说明：
-    - ts_code: 股票代码（必需），如 000001.SZ
+    - ts_code: 股票代码，如 000001.SZ
     - trade_date: 交易日期，格式 YYYYMMDD
-    - start_date/end_date: 开始/结束日期，格式 YYYYMMDD
     
-    返回格式：
-    - 单日查询（使用trade_date）：返回单个JSON对象
-    - 多日查询（使用start_date/end_date）：返回JSON对象数组
+    返回字段：
+    - turnover_status: 换手率状态 (high_turnover/normal_turnover/low_turnover)
+    - volume_status: 量比状态 (volume_surge/normal_volume/volume_dry_up)
+    - obv_trend: OBV趋势 (rising/falling/flat/insufficient_data)
+    - brar_sentiment: BRAR情绪 (bullish_sentiment/bearish_sentiment/neutral_sentiment)
+    - vr_status: VR容量比率 (bullish_volume/bearish_volume/neutral_volume)
+    - mfi_psy_status: MFI和PSY状态组合
+    - market_sentiment: 综合市场情绪 (strongly_bullish/strongly_bearish/apathetic/neutral)
     
-    返回示例：
-    {
-      "ts_code": "000001.SZ",
-      "trade_date": "20240115",
-      "price_vs_ma5": "above",
-      "ma5_vs_ma20": "bullish_alignment",
-      "macd_status": "positive_momentum",
-      "trend_direction": "up",
-      "trend_strength": "strong",
-      "momentum_change": "accelerating"
-    }
+    分析目标：
+    - 市场对这只股票的关注度高吗？
+    - 是资金流入还是流出？
+    - 当前情绪是乐观、悲观还是冷漠？
+    
+    使用说明：
+    - 基于stk_factor_pro的完整技术指标数据
+    - 综合多个量能与情绪指标给出判断
+    - 不判断价格方向，只判断情绪强度与倾向
     """
     try:
-        # 获取股票因子数据
-        df = pro.stk_factor_pro(
-            ts_code=ts_code,
-            trade_date=trade_date,
-            start_date=start_date,
-            end_date=end_date,
-        )
-        
-        if df.empty:
-            return json.dumps({"error": "未获取到数据"})
-        
-        # 按日期排序，确保时间序列正确
-        df = df.sort_values('trade_date').reset_index(drop=True)
-        
-        results = []
-        
-        for i in range(len(df)):
-            current_data = df.iloc[i]
-            result = {
-                "ts_code": current_data['ts_code'],
-                "trade_date": current_data['trade_date']
-            }
-            
-            # 字段1: price_vs_ma5 - 价格与5日均线关系
-            if pd.notna(current_data.get('close_qfq')) and pd.notna(current_data.get('ma_qfq_5')):
-                close = current_data['close_qfq']
-                ma5 = current_data['ma_qfq_5']
-                
-                # 检查是否有前一日数据进行穿越判断
-                if i > 0:
-                    prev_close = df.iloc[i-1]['close_qfq']
-                    prev_ma5 = df.iloc[i-1]['ma_qfq_5']
-                    
-                    # 向上穿越：前一日close ≤ ma5，当日close > ma5
-                    if prev_close <= prev_ma5 and close > ma5:
-                        result["price_vs_ma5"] = "crossing_up"
-                    # 向下穿越：前一日close ≥ ma5，当日close < ma5  
-                    elif prev_close >= prev_ma5 and close < ma5:
-                        result["price_vs_ma5"] = "crossing_down"
-                    else:
-                        # 静态位置
-                        result["price_vs_ma5"] = "above" if close > ma5 else "below"
-                else:
-                    # 第一天数据，只能判断静态位置
-                    result["price_vs_ma5"] = "above" if close > ma5 else "below"
-            else:
-                result["price_vs_ma5"] = None
-            
-            # 字段2: ma5_vs_ma20 - 均线排列状态
-            if pd.notna(current_data.get('ma_qfq_5')) and pd.notna(current_data.get('ma_qfq_20')):
-                ma5 = current_data['ma_qfq_5']
-                ma20 = current_data['ma_qfq_20']
-                result["ma5_vs_ma20"] = "bullish_alignment" if ma5 > ma20 else "bearish_alignment"
-            else:
-                result["ma5_vs_ma20"] = None
-            
-            # 字段3: macd_status - MACD信号
-            if (pd.notna(current_data.get('macd_dif_qfq')) and 
-                pd.notna(current_data.get('macd_dea_qfq'))):
-                
-                dif = current_data['macd_dif_qfq']
-                dea = current_data['macd_dea_qfq']
-                
-                # 检查是否有前一日数据进行交叉判断
-                if i > 0:
-                    prev_dif = df.iloc[i-1]['macd_dif_qfq']
-                    prev_dea = df.iloc[i-1]['macd_dea_qfq']
-                    
-                    # 金叉：前一日dif ≤ dea，当日dif > dea
-                    if prev_dif <= prev_dea and dif > dea:
-                        result["macd_status"] = "golden_cross"
-                    # 死叉：前一日dif ≥ dea，当日dif < dea
-                    elif prev_dif >= prev_dea and dif < dea:
-                        result["macd_status"] = "death_cross"
-                    else:
-                        # 非交叉日
-                        if dif > dea and dif > 0:
-                            result["macd_status"] = "positive_momentum"
-                        elif dif < dea and dif < 0:
-                            result["macd_status"] = "negative_momentum"
-                        else:
-                            result["macd_status"] = "recovering"
-                else:
-                    # 第一天数据，只能判断静态状态
-                    if dif > dea and dif > 0:
-                        result["macd_status"] = "positive_momentum"
-                    elif dif < dea and dif < 0:
-                        result["macd_status"] = "negative_momentum"
-                    else:
-                        result["macd_status"] = "recovering"
-            else:
-                result["macd_status"] = None
-            
-            # 字段4: trend_direction - 综合趋势方向
-            # 重新获取原始值（避免依赖 result 字段）
-            close = current_data.get('close_qfq')
-            ma5 = current_data.get('ma_qfq_5')
-            ma20 = current_data.get('ma_qfq_20')
-            dif = current_data.get('macd_dif_qfq')
-            dea = current_data.get('macd_dea_qfq')
-            
-            valid_for_trend = all(pd.notna(x) for x in [close, ma5, ma20, dif, dea])
-            
-            if valid_for_trend:
-                # 上涨：ma5 > ma20, price > ma5, 且 dif >= dea（允许金叉或正动量）
-                if ma5 > ma20 and close > ma5 and dif >= dea:
-                    result["trend_direction"] = "up"
-                # 下跌：ma5 < ma20, price < ma5, 且 dif <= dea
-                elif ma5 < ma20 and close < ma5 and dif <= dea:
-                    result["trend_direction"] = "down"
-                else:
-                    result["trend_direction"] = "sideways"
-            else:
-                result["trend_direction"] = None
-            
-            # 字段5: trend_strength - 趋势强度
-            # 使用相对MACD值（MACD/收盘价）避免股价绝对值影响
-            if (pd.notna(current_data.get('macd_qfq')) and 
-                pd.notna(current_data.get('close_qfq')) and 
-                current_data.get('close_qfq', 0) != 0):
-                
-                macd_hist = current_data['macd_qfq']
-                close = current_data['close_qfq']
-                relative_macd = abs(macd_hist) / close  # 相对强度
-                
-                # 计算20日窗口内的强度（如果数据足够）
-                start_idx = max(0, i-19)
-                window_data = df.iloc[start_idx:i+1]
-                
-                if len(window_data) >= 10:  # 至少需要10天数据
-                    # 计算相对MACD的历史分位数
-                    valid_window = window_data[
-                        (window_data['macd_qfq'].notna()) & 
-                        (window_data['close_qfq'].notna()) & 
-                        (window_data['close_qfq'] != 0)
-                    ]
-                    
-                    if len(valid_window) > 0:
-                        window_relative_macd = (valid_window['macd_qfq'].abs() / 
-                                              valid_window['close_qfq'])
-                        current_relative = relative_macd
-                        
-                        if len(window_relative_macd) > 0:
-                            percentile = (window_relative_macd < current_relative).mean() * 100
-                            
-                            if percentile >= 75:
-                                result["trend_strength"] = "strong"
-                            elif percentile <= 25:
-                                result["trend_strength"] = "weak"
-                            else:
-                                result["trend_strength"] = "moderate"
-                        else:
-                            result["trend_strength"] = "moderate"
-                    else:
-                        result["trend_strength"] = "moderate"
-                else:
-                    # 数据不足，使用相对阈值判断
-                    # 基于经验：相对MACD > 1% 视为强趋势，< 0.1% 视为弱趋势
-                    if relative_macd > 0.01:  # 1%
-                        result["trend_strength"] = "strong"
-                    elif relative_macd < 0.001:  # 0.1%
-                        result["trend_strength"] = "weak"
-                    else:
-                        result["trend_strength"] = "moderate"
-            else:
-                result["trend_strength"] = None
-            
-            # 字段6: momentum_change - 动量变化
-            if pd.notna(current_data.get('mtm_qfq')):
-                current_mtm = current_data['mtm_qfq']
-                
-                if i > 0:
-                    prev_mtm = df.iloc[i-1]['mtm_qfq']
-                    
-                    # 先判断动量方向是否反转（优先级最高）
-                    if (prev_mtm <= 0 and current_mtm > 0) or (prev_mtm >= 0 and current_mtm < 0):
-                        result["momentum_change"] = "reversing"
-                    elif current_mtm > 0:  # 上涨动量
-                        result["momentum_change"] = "accelerating" if current_mtm > prev_mtm else "decelerating"
-                    else:  # 下跌动量
-                        result["momentum_change"] = "accelerating_down" if current_mtm < prev_mtm else "decelerating_down"
-                else:
-                    # 第一天数据，只能判断当前状态
-                    result["momentum_change"] = "accelerating" if current_mtm > 0 else "accelerating_down"
-            else:
-                result["momentum_change"] = None
-            
-            results.append(result)
-        
-        # 根据输入参数决定返回格式：单日查询返回单个对象，多日查询返回列表
-        is_single_day = (trade_date is not None) and (start_date is None) and (end_date is None)
-        
-        if is_single_day and len(results) == 1:
-            return json.dumps(results[0], ensure_ascii=False, indent=2)
-        else:
-            return json.dumps(results, ensure_ascii=False, indent=2)
-        
+        from .tech_ext import get_sentiment_volume as sentiment_func
+        result = sentiment_func(ts_code, trade_date)
+        return json.dumps(result, ensure_ascii=False)
     except Exception as e:
         return json.dumps({"error": str(e)})
+
+
+
 
 
 if __name__ == "__main__":
